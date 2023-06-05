@@ -43,6 +43,7 @@ if($subs.GetType().IsArray -and $subs.length -gt 1){
 $sqlUser = "SQLUser"
 write-host ""
 $sqlPassword = ""
+sqlDatabaseName = "sqldwfc"
 $complexPassword = 0
 
 while ($complexPassword -ne 1)
@@ -155,5 +156,20 @@ New-AzRoleAssignment -Objectid $id -RoleDefinitionName "Storage Blob Data Owner"
 New-AzRoleAssignment -SignInName $userName -RoleDefinitionName "Storage Blob Data Owner" -Scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$dataLakeAccountName" -ErrorAction SilentlyContinue;
 
 
+# Upload files
+write-host "Uploading files..."
+$storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $dataLakeAccountName
+$storageContext = $storageAccount.Context
+Get-ChildItem "./data/*.csv" -File | Foreach-Object {
+    write-host ""
+    $file = $_.Name
+    Write-Host $file
+    $blobPath = "data/$file"
+    Set-AzStorageBlobContent -File $_.FullName -Container "files" -Blob $blobPath -Context $storageContext
+}
+
+# Create database
+#write-host "Creating the $sqlDatabaseName database..."
+#sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
 write-host "Script completed at $(Get-Date)"
