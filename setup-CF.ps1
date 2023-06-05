@@ -43,7 +43,7 @@ if($subs.GetType().IsArray -and $subs.length -gt 1){
 $sqlUser = "SQLUser"
 write-host ""
 $sqlPassword = ""
-sqlDatabaseName = "sqldwfc"
+$sqlDatabaseName = "sqldwfc"
 $complexPassword = 0
 
 while ($complexPassword -ne 1)
