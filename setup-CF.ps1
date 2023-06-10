@@ -179,6 +179,13 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
 $KeyVaultName ="kvdwfc"
 write-host "Creating the $KeyVaultName Azure Key Vault..."
 az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
+
+$sourceSasToken = "https://couponfollowdehiring.blob.core.windows.net/hiring/Data.zip?sv=2021-10-04&st=2023-05-26T16%3A27%3A33Z&se=2024-05-27T16%3A27%3A00Z&sr=b&sp=r&sig=0rPNqOglARvrvLEr6CmY3V6LcYGi9yxSmoW73UloYis%3D"
+$sourceSasTokenName = "sourceSasToken"
+$sourceFileName = "Data.zip"
+az keyvault secret set --name $sourceSasTokenName --value $sourceSasToken --vault-name $KeyVaultName
+write-host "SAS Token $sourceSasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
+
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
 $SasToken = az storage container generate-sas --account-name shellstorageor --name cfsource --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
@@ -187,5 +194,16 @@ $SasTokenName = "stoken"
 az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
 write-host "SAS Token $sqlPasswordName, stored into the $KeyVaultName, will expire at $ExpiryDate"
 az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
-write-host "SAS Token $SASTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
+write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
+
+#$linkedServiceName = "lsDataLake"
+#az synapse linked-service create --workspace-name $synapseWorkspace --name $linkedServiceName --file @"path/$linkedServiceName.json"
+#write-host "Linked Service $linkedServiceName created"
+
+$linkedServiceDLName = "$synapseWorkspace-WorkspaceDefaultStorage"
+$linkedServiceSQLName = "$synapseWorkspace-WorkspaceDefaultSqlServer"
+
+azcopy copy "https://couponfollowdehiring.blob.core.windows.net/hiring/Data.zip?sv=2021-10-04&st=2023-05-26T16%3A27%3A33Z&se=2024-05-27T16%3A27%3A00Z&sr=b&sp=r&sig=0rPNqOglARvrvLEr6CmY3V6LcYGi9yxSmoW73UloYis%3D" "https://datalakeofnbgea.blob.core.windows.net/files/data/Data.zip?sp=racw&st=2023-06-05T15:37:31Z&se=2023-06-29T23:37:31Z&spr=https&sv=2022-11-02&sr=d&sig=XlrBMISn6k2JSj5SKtAvqbYZ7Ex%2FsBKvN6bTWvas7Y4%3D&sdd=1" --recursive=true
+azcopy copy $sourceSasToken "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName?$SasToken"
+
 write-host "Script completed at $(Get-Date)"
