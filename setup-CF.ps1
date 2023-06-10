@@ -43,6 +43,7 @@ if($subs.GetType().IsArray -and $subs.length -gt 1){
 $sqlUser = "SQLUser"
 write-host ""
 $sqlPassword = ""
+$sqlPasswordName = "sqlPassword"
 $sqlDatabaseName = "sqldwfc"
 $complexPassword = 0
 
@@ -182,6 +183,7 @@ $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
 $SasToken = az storage container generate-sas --account-name shellstorageor --name cfsource --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
 $SasTokenName = "stoken$suffix"
+az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
 az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
 write-host "SAS Token $SASTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
 write-host "Script completed at $(Get-Date)"
