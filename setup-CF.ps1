@@ -175,13 +175,15 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
 #sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
 # Create KeyVault
-$KeyVaultName ="kvdwfc$suffix"
+#$KeyVaultName ="kvdwfc$suffix"
+$KeyVaultName ="kvdwfc"
 write-host "Creating the $KeyVaultName Azure Key Vault..."
 az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
 $SasToken = az storage container generate-sas --account-name shellstorageor --name cfsource --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
-$SasTokenName = "stoken$suffix"
+#$SasTokenName = "stoken$suffix"
+$SasTokenName = "stoken"
 az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
 write-host "SAS Token $sqlPasswordName, stored into the $KeyVaultName, will expire at $ExpiryDate"
 az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
