@@ -46,6 +46,7 @@ $sqlPassword = ""
 $sqlDatabaseName = "sqldwfc"
 $complexPassword = 0
 
+
 while ($complexPassword -ne 1)
 {
     $SqlPassword = Read-Host "Enter a password to use for the $sqlUser login.
@@ -80,7 +81,7 @@ foreach ($provider in $provider_list){
 # Generate unique random suffix
 [string]$suffix =  -join ((48..57) + (97..122) | Get-Random -Count 7 | % {[char]$_})
 Write-Host "Your randomly-generated suffix for Azure resources is $suffix"
-$resourceGroupName = "dp500-$suffix"
+$resourceGroupName = "cf-assessment-$suffix"
 
 # Choose a random region
 Write-Host "Finding an available region. This may take several minutes...";
@@ -92,6 +93,7 @@ $locations = Get-AzLocation | Where-Object {
     $_.Providers -contains "Microsoft.Sql" -and
     $_.Providers -contains "Microsoft.Storage" -and
     $_.Providers -contains "Microsoft.Compute" -and
+    $_.Providers -contains "Microsoft.KeyVault" -and
     $_.Location -in $preferred_list
 }
 $max_index = $locations.Count - 1
@@ -172,4 +174,14 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
 #write-host "Creating the $sqlDatabaseName database..."
 #sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
+# Create KeyVault
+$KeyVaultName ="kvdwfc$suffix"
+write-host "Creating the $KeyVaultName Azure Key Vault..."
+az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
+$CurrentDate = Get-Date
+$ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
+$SasToken = az storage container generate-sas --account-name shellstorageor --name cfsource --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
+$SasTokenName = "stoken$suffix"
+az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
+write-host "SAS Token $SASTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
 write-host "Script completed at $(Get-Date)"
