@@ -25,11 +25,11 @@ $synapseWorkspace = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
 $KeyVaultName ="kvdwfc$suffix"
 $sourceSasTokenName = "sourceSasToken"
-$sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query value
+$sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query value -o tsv
 write-host $sourceSasToken
 $sourceFileName = "Data.zip"
 $SasTokenName = "stoken"
-$SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $SasTokenName --query value
+$SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $SasTokenName --query value -o tsv
 write-host $SasToken
 
 # Set variables
@@ -41,6 +41,7 @@ write-host $dataLakeAccountName
 write-host $destinationFileSystemName
 
 write-host $destinationDirectoryName
+
 
 # Copy the files
 azcopy copy $sourceSasToken "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName?$SasToken"
