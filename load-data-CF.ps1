@@ -46,6 +46,7 @@ $sqlPassword = ""
 $sqlDatabaseName = "sqldwfc"
 $complexPassword = 0
 
+y
 # Register resource providers
 Write-Host "Registering resource providers...";
 $provider_list = "Microsoft.Synapse", "Microsoft.Sql", "Microsoft.Storage", "Microsoft.Compute"

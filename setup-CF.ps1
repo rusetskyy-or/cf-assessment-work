@@ -183,7 +183,7 @@ $sourceSasToken = "https://couponfollowdehiring.blob.core.windows.net/hiring/Dat
 $sourceSasTokenName = "sourceSasToken"
 $sourceFileName = "Data.zip"
 az keyvault secret set --name $sourceSasTokenName --value $sourceSasToken --vault-name $KeyVaultName
-write-host "SAS Token $sourceSasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
+write-host "SAS Token $sourceSasTokenName is stored into the $KeyVaultName"
 
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
@@ -191,7 +191,7 @@ $SasToken = az storage container generate-sas --account-name shellstorageor --na
 #$SasTokenName = "stoken$suffix"
 $SasTokenName = "stoken"
 az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
-write-host "SAS Token $sqlPasswordName, stored into the $KeyVaultName, will expire at $ExpiryDate"
+write-host "SAS Token $sqlPasswordName is stored into the $KeyVaultName"
 az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
 write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
 
