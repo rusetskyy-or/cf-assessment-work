@@ -25,11 +25,11 @@ $synapseWorkspace = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
 $KeyVaultName ="kvdwfc$suffix"
 $sourceSasTokenName = "sourceSasToken"
-$sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query --value
+$sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query value
 write-host $sourceSasToken
 $sourceFileName = "Data.zip"
 $SasTokenName = "stoken"
-$SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $TokenName --query --value
+$SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $TokenName --query value
 write-host $SasToken
 
 # Set variables
