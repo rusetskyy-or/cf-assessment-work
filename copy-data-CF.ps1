@@ -29,7 +29,7 @@ $sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sou
 write-host $sourceSasToken
 $sourceFileName = "Data.zip"
 $SasTokenName = "stoken"
-$SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $TokenName --query value
+$SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $SasTokenName --query value
 write-host $SasToken
 
 # Set variables
