@@ -175,8 +175,7 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
 #sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
 # Create KeyVault
-#$KeyVaultName ="kvdwfc$suffix"
-$KeyVaultName ="kvdwfc"
+$KeyVaultName ="kvdwfc$suffix"
 write-host "Creating the $KeyVaultName Azure Key Vault..."
 az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
 
