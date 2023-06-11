@@ -30,6 +30,7 @@ write-host $sourceSasToken
 $sourceFileName = "Data.zip"
 $SasTokenName = "stoken"
 $SasToken = az KeyVault secret show --vault-name $KeyVaultName --name $SasTokenName --query value -o tsv
+$SasToken = $SasToken.Trim('"')
 write-host $SasToken
 
 # Set variables

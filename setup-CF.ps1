@@ -188,6 +188,7 @@ write-host "SAS Token $sourceSasTokenName is stored into the $KeyVaultName"
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
 $SasToken = az storage container generate-sas --account-name shellstorageor --name cfsource --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
+$SasToken = $SasToken.Trim('"')
 #$SasTokenName = "stoken$suffix"
 $SasTokenName = "stoken"
 az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
