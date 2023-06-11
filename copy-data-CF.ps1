@@ -41,7 +41,7 @@ write-host $dataLakeAccountName
 write-host $destinationFileSystemName
 
 write-host $destinationDirectoryName
-$targetSasToken = https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName?$SasToken
+$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName?$SasToken"
 
 # Copy the files
 azcopy copy $sourceSasToken $targetSasToken
