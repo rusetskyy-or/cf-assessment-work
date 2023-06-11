@@ -47,5 +47,5 @@ $targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data
 write-host $targetSasToken
 
 # Copy the files
-azcopy copy "$sourceSasToken" "$targetSasToken"
+azcopy copy "$sourceSasToken" "$targetSasToken" --recursive=true
 write-host "Script completed at $(Get-Date)"
