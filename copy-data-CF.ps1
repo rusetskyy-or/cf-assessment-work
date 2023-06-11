@@ -23,6 +23,7 @@ $resourceGroupName = "cf-assessment-$suffix"
 # Create Synapse workspace
 $synapseWorkspace = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
+$containerName = "files"
 $KeyVaultName ="kvdwfc$suffix"
 $sourceSasTokenName = "sourceSasToken"
 $sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query value -o tsv
@@ -42,9 +43,9 @@ write-host $dataLakeAccountName
 write-host $destinationFileSystemName
 
 write-host $destinationDirectoryName
-$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName?$SasToken"
+$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName"+"?"+$SasToken
 write-host $targetSasToken
 
 # Copy the files
-azcopy copy $sourceSasToken $targetSasToken
+azcopy copy "$sourceSasToken" "$targetSasToken"
 write-host "Script completed at $(Get-Date)"

@@ -160,6 +160,7 @@ New-AzRoleAssignment -SignInName $userName -RoleDefinitionName "Storage Blob Dat
 
 # Upload files
 write-host "Uploading files..."
+$containerName = "files"
 $storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $dataLakeAccountName
 $storageContext = $storageAccount.Context
 Get-ChildItem "./data/*.csv" -File | Foreach-Object {
@@ -167,7 +168,7 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
     $file = $_.Name
     Write-Host $file
     $blobPath = "data/$file"
-    Set-AzStorageBlobContent -File $_.FullName -Container "files" -Blob $blobPath -Context $storageContext
+    Set-AzStorageBlobContent -File $_.FullName -Container $containerName -Blob $blobPath -Context $storageContext
 }
 
 # Create database
@@ -187,7 +188,7 @@ write-host "SAS Token $sourceSasTokenName is stored into the $KeyVaultName"
 
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
-$SasToken = az storage container generate-sas --account-name shellstorageor --name cfsource --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
+$SasToken = az storage container generate-sas --account-name $dataLakeAccountName --name  --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
 $SasToken = $SasToken.Trim('"')
 #$SasTokenName = "stoken$suffix"
 $SasTokenName = "stoken"
