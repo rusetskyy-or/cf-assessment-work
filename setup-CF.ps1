@@ -153,7 +153,7 @@ write-host "Granting permissions on the $dataLakeAccountName storage account..."
 write-host "(you can ignore any warnings!)"
 $subscriptionId = (Get-AzContext).Subscription.Id
 $userName = ((az ad signed-in-user show) | ConvertFrom-JSON).UserPrincipalName
-$id = (Get-AzADServicePrincipal -DisplayName $synapseWorkspace).id
+$id = (Get-AzADServicePrincipal -DisplayName $synapseWorkspaceName).id
 New-AzRoleAssignment -Objectid $id -RoleDefinitionName "Storage Blob Data Owner" -Scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$dataLakeAccountName" -ErrorAction SilentlyContinue;
 New-AzRoleAssignment -SignInName $userName -RoleDefinitionName "Storage Blob Data Owner" -Scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$dataLakeAccountName" -ErrorAction SilentlyContinue;
 
@@ -244,8 +244,8 @@ write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire 
 #az synapse linked-service create --workspace-name $synapseWorkspaceName --name $linkedServiceName --file @"path/$linkedServiceName.json"
 #write-host "Linked Service $linkedServiceName created"
 
-$linkedServiceDLName = "$synapseWorkspace-WorkspaceDefaultStorage"
-$linkedServiceSQLName = "$synapseWorkspace-WorkspaceDefaultSqlServer"
+$linkedServiceDLName = "$synapseWorkspaceName-WorkspaceDefaultStorage"
+$linkedServiceSQLName = "$synapseWorkspaceName-WorkspaceDefaultSqlServer"
 
 $targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/$ContainerName/$sourceFileName"+"?"+$SasToken
 
