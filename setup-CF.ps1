@@ -172,8 +172,8 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
 }
 
 # Create database
-#write-host "Creating the $sqlDatabaseName database..."
-#sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
+write-host "Creating the $sqlDatabaseName database..."
+sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
 # Create KeyVault
 $KeyVaultName ="kvdwfc$suffix"
@@ -206,9 +206,11 @@ $linkedServiceSQLName = "$synapseWorkspace-WorkspaceDefaultSqlServer"
 
 $targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName"+"?"+$SasToken
 
+write-host $targetSasToken
+
 write-host "Copying the source file $sourceFileName"
 azcopy copy "$sourceSasToken" "$targetSasToken" --recursive=true
 
-write-host $targetSasToken
+
 
 write-host "Script completed at $(Get-Date)"
