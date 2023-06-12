@@ -195,7 +195,7 @@ az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --lo
 #create DataSets in the Azure Synapse Pipelines
 
 $synapseWorkspace = Get-AzSynapseWorkspace -Name $synapseWorkspaceName -ResourceGroupName $resourceGroupName
-Get-ChildItem "./pipelines/dataset/*." -File | Foreach-Object {
+Get-ChildItem "./pipelines/dataset/*.json" -File | Foreach-Object {
     write-host ""
     $file = $_.Name
     Write-Host $file
@@ -204,6 +204,20 @@ Get-ChildItem "./pipelines/dataset/*." -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     $NewContent | Set-Content -Path $blobPath 
     New-AzSynapseDataset -File $blobPath -WorkspaceName $synapseWorkspaceName 
+}
+
+#create Pipelines in the Azure Synapse Pipelines
+
+$synapseWorkspace = Get-AzSynapseWorkspace -Name $synapseWorkspaceName -ResourceGroupName $resourceGroupName
+Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
+    write-host ""
+    $file = $_.Name
+    Write-Host $file
+    $blobPath = "pipelines/pipeline/$file"
+    $content = Get-Content -Path $blobPath
+    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
+    $NewContent | Set-Content -Path $blobPath 
+    New-AzSynapsePipeline -File $blobPath -WorkspaceName $synapseWorkspaceName 
 }
 
 
