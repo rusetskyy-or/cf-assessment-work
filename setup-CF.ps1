@@ -217,7 +217,7 @@ Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
 }
 
 
