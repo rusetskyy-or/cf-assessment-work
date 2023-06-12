@@ -15,7 +15,7 @@
         "typeProperties": {
             "blobPathBeginsWith": "/files/blobs/Data.zip",
             "ignoreEmptyBlobs": true,
-            "scope": "/subscriptions/$subscription$/resourceGroups/cf-assessment-fbqao9p/providers/Microsoft.Storage/storageAccounts/datalakesuffix",
+            "scope": "/subscriptions/&subscription&/resourceGroups/cf-assessment-fbqao9p/providers/Microsoft.Storage/storageAccounts/datalakesuffix",
             "events": [
                 "Microsoft.Storage.BlobCreated"
             ]

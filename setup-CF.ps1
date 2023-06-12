@@ -220,6 +220,20 @@ Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
     New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
 }
 
+#create Pipelines in the Azure Synapse Pipelines
+
+Get-ChildItem "./pipelines/trigger/*.json" -File | Foreach-Object {
+    $file = $_.Name
+    write-host "Creating the $file Azure Synapse Pipelines trigger..."
+    $blobPath = "pipelines/pipeline/$file"
+    $content = Get-Content -Path $blobPath
+    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
+    $NewContent = $content | ForEach-Object {$_ -replace "&subscription&", $subscriptionId}
+    write-host $NewContent
+    $NewContent | Set-Content -Path $blobPath 
+    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
+}
+
 
 
 $sourceSasToken = "https://couponfollowdehiring.blob.core.windows.net/hiring/Data.zip?sv=2021-10-04&st=2023-05-26T16%3A27%3A33Z&se=2024-05-27T16%3A27%3A00Z&sr=b&sp=r&sig=0rPNqOglARvrvLEr6CmY3V6LcYGi9yxSmoW73UloYis%3D"
