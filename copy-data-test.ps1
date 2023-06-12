@@ -50,6 +50,10 @@ write-host $targetSasToken
 az storage blob download --container-name "hiring" --name $sourceFileName --file ./$sourceFileName `
 --account-name "couponfollowdehiring" --sas-token $sourceSasToken
 
+#unzip Data.zip files to local folder
+unzip Data.zip -d ./data  
+
+
 # Copy the files
 #azcopy copy "$sourceSasToken" "$targetSasToken" --recursive=true
 write-host "Script completed at $(Get-Date)"

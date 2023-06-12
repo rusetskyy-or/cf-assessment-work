@@ -15,7 +15,7 @@ foreach ($provider in $provider_list){
     Write-Host "$provider : $status"
 }
 
-$suffix = "y4ev06c"
+$suffix = "y2w5ua7"
 
 $resourceGroupName = "cf-assessment-$suffix"
 
