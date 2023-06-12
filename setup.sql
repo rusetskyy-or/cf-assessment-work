@@ -2,12 +2,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[DimAdvertisers](
-	[AdvertiserId] [int] NOT NULL,
-	[AdvertiserName] [nvarchar](100) NULL,
-	[AffiliateNetworkId] [int] NOT NULL)
-
-GO
 
 CREATE TABLE  [dbo].[DimAffiliateNetwork](
 	[AffiliateNetworkId] [int] NOT NULL,
@@ -15,6 +9,19 @@ CREATE TABLE  [dbo].[DimAffiliateNetwork](
 )
 
 GO
+
+CREATE TABLE [dbo].[DimAdvertisers](
+	[AdvertiserId] [int] NOT NULL,
+	[AdvertiserName] [nvarchar](100) NULL,
+	[AffiliateNetworkId] [int] NOT NULL
+),
+CONSTRAINT FKAdvertisersAffiliateNetworkId 
+	FOREIGN KEY (AffiliateNetworkId)
+	REFERENCES DimAffiliateNetwork
+
+GO
+
+
 
 CREATE TABLE [dbo].[DimDomainNames](
 	[DomainNameId] [int] NOT NULL,
