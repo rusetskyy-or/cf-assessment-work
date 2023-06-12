@@ -46,7 +46,19 @@ CONSTRAINT FKPromotionsDomainNameId
 	FOREIGN KEY (DomainNameId)
 	REFERENCES DimDomainNames
 
+GO
 
+CREATE TABLE [dbo].[orders](
+	OrderId [int] NOT NULL,
+	ClickId [int] NULL,
+	CreatedOn,
+	TransactionDate,
+	SaleAmount,
+	CommissonAmount,
+	Currency,
+	AffiliateNetworkId [int] NULL,
+	AdvertiserId [int] NULL
+)
 
 GO
 

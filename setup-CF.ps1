@@ -225,7 +225,7 @@ Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
 Get-ChildItem "./pipelines/trigger/*.json" -File | Foreach-Object {
     $file = $_.Name
     write-host "Creating the $file Azure Synapse Pipelines trigger..."
-    $blobPath = "pipelines/pipeline/$file"
+    $blobPath = "pipelines/trigger/$file"
     $content = Get-Content -Path $blobPath
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     $NewContent = $content | ForEach-Object {$_ -replace "&subscription&", $subscriptionId}
