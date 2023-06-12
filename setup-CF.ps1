@@ -134,14 +134,14 @@ Write-Host "Creating $resourceGroupName resource group in $Region ..."
 New-AzResourceGroup -Name $resourceGroupName -Location $Region | Out-Null
 
 # Create Synapse workspace
-$synapseWorkspace = "synapse$suffix"
+$synapseWorkspaceName = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
 
 write-host "Creating $synapseWorkspace Synapse Analytics workspace in $resourceGroupName resource group..."
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
   -TemplateFile "setup.json" `
   -Mode Complete `
-  -workspaceName $synapseWorkspace `
+  -workspaceName $synapseWorkspaceName `
   -dataLakeAccountName $dataLakeAccountName `
   -sqlUser $sqlUser `
   -sqlPassword $sqlPassword `
@@ -181,6 +181,33 @@ $KeyVaultName ="kvdwfc$suffix"
 write-host "Creating the $KeyVaultName Azure Key Vault..."
 az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
 
+#replace suffix in Synapse pipeline files
+Get-ChildItem "./pipelines/*." -File | Foreach-Object {
+    write-host ""
+    $file = $_.Name
+    Write-Host $file
+    $blobPath = "pipelines/$file"
+    $content = Get-Content -Path $blobPath
+    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
+    $NewContent | Set-Content -Path $blobPath  
+}
+
+#create DataSets in the Azure Synapse Pipelines
+
+$synapseWorkspace = Get-AzSynapseWorkspace -Name $synapseWorkspaceName -ResourceGroupName $resourceGroupName
+Get-ChildItem "./pipelines/dataset/*." -File | Foreach-Object {
+    write-host ""
+    $file = $_.Name
+    Write-Host $file
+    $blobPath = "pipelines/dataset/$file"
+    $content = Get-Content -Path $blobPath
+    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
+    $NewContent | Set-Content -Path $blobPath 
+    New-AzSynapseDataset -File $blobPath -WorkspaceName $synapseWorkspaceName 
+}
+
+
+
 $sourceSasToken = "https://couponfollowdehiring.blob.core.windows.net/hiring/Data.zip?sv=2021-10-04&st=2023-05-26T16%3A27%3A33Z&se=2024-05-27T16%3A27%3A00Z&sr=b&sp=r&sig=0rPNqOglARvrvLEr6CmY3V6LcYGi9yxSmoW73UloYis%3D"
 $sourceSasTokenName = "sourceSasToken"
 $sourceFileName = "Data.zip"
@@ -200,7 +227,7 @@ az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyV
 write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
 
 #$linkedServiceName = "lsDataLake"
-#az synapse linked-service create --workspace-name $synapseWorkspace --name $linkedServiceName --file @"path/$linkedServiceName.json"
+#az synapse linked-service create --workspace-name $synapseWorkspaceName --name $linkedServiceName --file @"path/$linkedServiceName.json"
 #write-host "Linked Service $linkedServiceName created"
 
 $linkedServiceDLName = "$synapseWorkspace-WorkspaceDefaultStorage"

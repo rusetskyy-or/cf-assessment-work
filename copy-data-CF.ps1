@@ -15,18 +15,19 @@ foreach ($provider in $provider_list){
     Write-Host "$provider : $status"
 }
 
-$suffix = "y2w5ua7"
+$suffix = "fbqao9p"
 
 $resourceGroupName = "cf-assessment-$suffix"
 
 
 # Create Synapse workspace
-$synapseWorkspace = "synapse$suffix"
+$synapseWorkspaceName = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
 $containerName = "files"
 $KeyVaultName ="kvdwfc$suffix"
 $sourceSasTokenName = "sourceSasToken"
-$sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query value -o tsv
+$sourceSasToken = az KeyVault secret show --vault-name $KeyVaultName --name $sourceSasTokenName --query value `
+-o tsv
 write-host $sourceSasToken
 $sourceFileName = "Data.zip"
 $SasTokenName = "stoken"
