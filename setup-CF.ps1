@@ -143,6 +143,7 @@ New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
   -Mode Complete `
   -workspaceName $synapseWorkspaceName `
   -dataLakeAccountName $dataLakeAccountName `
+  -sqlDatabaseName $sqlDatabaseName `
   -sqlUser $sqlUser `
   -sqlPassword $sqlPassword `
   -uniqueSuffix $suffix `
@@ -203,12 +204,11 @@ Get-ChildItem "./pipelines/dataset/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapseDataset -File $blobPath -Name $file -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapseDataset -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
 }
 
 #create Pipelines in the Azure Synapse Pipelines
 
-$synapseWorkspace = Get-AzSynapseWorkspace -Name $synapseWorkspaceName -ResourceGroupName $resourceGroupName
 Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
     $file = $_.Name
     write-host "Creating the $file Azure Synapse Pipelines pipeline..."
