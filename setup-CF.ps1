@@ -203,7 +203,7 @@ Get-ChildItem "./pipelines/dataset/*.json" -File | Foreach-Object {
     $content = Get-Content -Path $blobPath
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapseDataset -File $blobPath -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapseDataset -File $blobPath -Name $file -WorkspaceName $synapseWorkspaceName 
 }
 
 #create Pipelines in the Azure Synapse Pipelines
@@ -217,7 +217,7 @@ Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
     $content = Get-Content -Path $blobPath
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapsePipeline -File $blobPath -Name $file -WorkspaceName $synapseWorkspaceName 
 }
 
 
