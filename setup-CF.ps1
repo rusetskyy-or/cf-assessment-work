@@ -182,15 +182,15 @@ write-host "Creating the $KeyVaultName Azure Key Vault..."
 az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
 
 #replace suffix in Synapse pipeline files
-Get-ChildItem "./pipelines/*." -File | Foreach-Object {
-    write-host ""
-    $file = $_.Name
-    Write-Host $file
-    $blobPath = "pipelines/$file"
-    $content = Get-Content -Path $blobPath
-    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
-    $NewContent | Set-Content -Path $blobPath  
-}
+#Get-ChildItem "./pipelines/*." -File | Foreach-Object {
+#    write-host ""
+#    $file = $_.Name
+#    Write-Host $file
+#    $blobPath = "pipelines/$file"
+#    $content = Get-Content -Path $blobPath
+#    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
+#    $NewContent | Set-Content -Path $blobPath  
+#}
 
 #create DataSets in the Azure Synapse Pipelines
 
