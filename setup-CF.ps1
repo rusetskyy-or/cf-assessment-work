@@ -170,6 +170,7 @@ Get-ChildItem "./data/*.csv" -File | Foreach-Object {
     $blobPath = "data/$file"
     Set-AzStorageBlobContent -File $_.FullName -Container $containerName -Blob $blobPath -Context $storageContext
 }
+$storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $dataLakeAccountName).Value[0]
 
 # Create database
 write-host "Creating the $sqlDatabaseName database..."
@@ -188,7 +189,8 @@ write-host "SAS Token $sourceSasTokenName is stored into the $KeyVaultName"
 
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
-$SasToken = az storage container generate-sas --account-name $dataLakeAccountName --name $containerName  --permissions racw --expiry $ExpiryDate --auth-mode login --as-user
+$SasToken = az storage container generate-sas --account-name $dataLakeAccountName --name $containerName `
+--https-only --permissions racw --expiry $ExpiryDate --account-key $storageAccountKey
 $SasToken = $SasToken.Trim('"')
 #$SasTokenName = "stoken$suffix"
 $SasTokenName = "stoken"
@@ -204,7 +206,7 @@ write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire 
 $linkedServiceDLName = "$synapseWorkspace-WorkspaceDefaultStorage"
 $linkedServiceSQLName = "$synapseWorkspace-WorkspaceDefaultSqlServer"
 
-$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName"+"?"+$SasToken
+$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/$ContainerName/$sourceFileName"+"?"+$SasToken
 
 write-host $targetSasToken
 
