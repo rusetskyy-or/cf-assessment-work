@@ -188,7 +188,7 @@ write-host "SAS Token $sourceSasTokenName is stored into the $KeyVaultName"
 
 $CurrentDate = Get-Date
 $ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
-$SasToken = az storage container generate-sas --account-name $dataLakeAccountName --name  --permissions acdlrw --expiry $ExpiryDate --auth-mode login --as-user
+$SasToken = az storage container generate-sas --account-name $dataLakeAccountName --name $containerName  --permissions racw --expiry $ExpiryDate --auth-mode login --as-user
 $SasToken = $SasToken.Trim('"')
 #$SasTokenName = "stoken$suffix"
 $SasTokenName = "stoken"
@@ -204,7 +204,11 @@ write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire 
 $linkedServiceDLName = "$synapseWorkspace-WorkspaceDefaultStorage"
 $linkedServiceSQLName = "$synapseWorkspace-WorkspaceDefaultSqlServer"
 
-#azcopy copy "https://couponfollowdehiring.blob.core.windows.net/hiring/Data.zip?sv=2021-10-04&st=2023-05-26T16%3A27%3A33Z&se=2024-05-27T16%3A27%3A00Z&sr=b&sp=r&sig=0rPNqOglARvrvLEr6CmY3V6LcYGi9yxSmoW73UloYis%3D" "https://datalakeofnbgea.blob.core.windows.net/files/data/Data.zip?sp=racw&st=2023-06-05T15:37:31Z&se=2023-06-29T23:37:31Z&spr=https&sv=2022-11-02&sr=d&sig=XlrBMISn6k2JSj5SKtAvqbYZ7Ex%2FsBKvN6bTWvas7Y4%3D&sdd=1" --recursive=true
-azcopy copy $sourceSasToken "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName?$SasToken"
+$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/files/data/$sourceFileName"+"?"+$SasToken
+
+write-host "Copying the source file $sourceFileName"
+azcopy copy "$sourceSasToken" "$targetSasToken" --recursive=true
+
+write-host $targetSasToken
 
 write-host "Script completed at $(Get-Date)"
