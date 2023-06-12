@@ -163,14 +163,14 @@ New-AzRoleAssignment -SignInName $userName -RoleDefinitionName "Storage Blob Dat
 write-host "Uploading files..."
 $containerName = "files"
 $storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $dataLakeAccountName
-$storageContext = $storageAccount.Context
-Get-ChildItem "./data/*.csv" -File | Foreach-Object {
-    write-host ""
-    $file = $_.Name
-    Write-Host $file
-    $blobPath = "data/$file"
-    Set-AzStorageBlobContent -File $_.FullName -Container $containerName -Blob $blobPath -Context $storageContext
-}
+#$storageContext = $storageAccount.Context
+#Get-ChildItem "./data/*.csv" -File | Foreach-Object {
+#    write-host ""
+#    $file = $_.Name
+#    Write-Host $file
+#    $blobPath = "data/$file"
+#    Set-AzStorageBlobContent -File $_.FullName -Container $containerName -Blob $blobPath -Context $storageContext
+#}
 $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $dataLakeAccountName).Value[0]
 
 # Create database
