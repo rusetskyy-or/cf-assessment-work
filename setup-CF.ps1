@@ -44,7 +44,6 @@ $sqlUser = "SQLUser"
 write-host ""
 $sqlPassword = ""
 $sqlPasswordName = "sqlPassword"
-$sqlDatabaseName = "sqldwfc"
 $complexPassword = 0
 
 
@@ -136,6 +135,8 @@ New-AzResourceGroup -Name $resourceGroupName -Location $Region | Out-Null
 # Create Synapse workspace
 $synapseWorkspaceName = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
+$sparkPool = "spark$suffix"
+$sqlDatabaseName = "sql$suffix"
 
 write-host "Creating $synapseWorkspace Synapse Analytics workspace in $resourceGroupName resource group..."
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
@@ -143,7 +144,6 @@ New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
   -Mode Complete `
   -workspaceName $synapseWorkspaceName `
   -dataLakeAccountName $dataLakeAccountName `
-  -sqlDatabaseName $sqlDatabaseName `
   -sqlUser $sqlUser `
   -sqlPassword $sqlPassword `
   -uniqueSuffix $suffix `
