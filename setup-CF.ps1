@@ -174,7 +174,7 @@ $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupN
 
 # Create database
 write-host "Creating the $sqlDatabaseName database..."
-#sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
+sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
 # Create KeyVault
 $KeyVaultName ="kvdwfc$suffix"
@@ -217,7 +217,7 @@ Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -Name $file -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapsePipeline -File $blobPath -WorkspaceName $synapseWorkspaceName 
 }
 
 
@@ -239,13 +239,6 @@ az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name
 write-host "SAS Token $sqlPasswordName is stored into the $KeyVaultName"
 az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
 write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
-
-#$linkedServiceName = "lsDataLake"
-#az synapse linked-service create --workspace-name $synapseWorkspaceName --name $linkedServiceName --file @"path/$linkedServiceName.json"
-#write-host "Linked Service $linkedServiceName created"
-
-$linkedServiceDLName = "$synapseWorkspaceName-WorkspaceDefaultStorage"
-$linkedServiceSQLName = "$synapseWorkspaceName-WorkspaceDefaultSqlServer"
 
 $targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/$ContainerName/$sourceFileName"+"?"+$SasToken
 

@@ -5,10 +5,7 @@ GO
 CREATE TABLE [dbo].[DimAdvertisers](
 	[AdvertiserId] [int] NOT NULL,
 	[AdvertiserName] [nvarchar](100) NULL,
-	[AffiliateNetworkId] [int] NOT NULL),
-CONSTRAINT FKAdvertisersAdvertiserId 
-	FOREIGN KEY (AdvertiserId)
-	REFERENCES Orders
+	[AffiliateNetworkId] [int] NOT NULL)
 
 GO
 
@@ -17,11 +14,32 @@ CREATE TABLE  [dbo].[DimAffiliateNetwork](
 	[AffiliateNetworkId] [nvarchar](100) NULL
 )
 
+GO
+
 CREATE TABLE [dbo].[DimDomainNames](
 	[DomainNameId] [int] NOT NULL,
 	[DomainName] [nvarchar](100) NULL
 )
 
+GO
+
+CREATE TABLE [dbo].[dimPartnerWebSites](
+	[PartnerWebsiteId] [int] NOT NULL,
+	[Name] [nvarchar](100) NULL
+)
+
+GO
+
+CREATE TABLE [dbo].[DimPromotions](
+	[PromotionId] [int] NOT NULL,
+	[DomainNameId] [int] NULL,
+	[ExpireDate]
+),
+CONSTRAINT FKPromotionsDomainNameId 
+	FOREIGN KEY (DomainNameId)
+	REFERENCES DimDomainNames
+
 
 
 GO
+
