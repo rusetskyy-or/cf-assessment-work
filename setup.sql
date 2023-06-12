@@ -11,3 +11,17 @@ CONSTRAINT FKAdvertisersAdvertiserId
 	REFERENCES Orders
 
 GO
+
+CREATE TABLE  [dbo].[DimAffiliateNetwork](
+	[AffiliateNetworkId] [int] NOT NULL,
+	[AffiliateNetworkId] [nvarchar](100) NULL
+)
+
+CREATE TABLE [dbo].[DimDomainNames](
+	[DomainNameId] [int] NOT NULL,
+	[DomainName] [nvarchar](100) NULL
+)
+
+
+
+GO
