@@ -138,10 +138,10 @@ $dataLakeAccountName = "datalake$suffix"
 $sparkPool = "spark$suffix"
 $sqlDatabaseName = "sql$suffix"
 
-write-host "Creating $synapseWorkspace Synapse Analytics workspace in $resourceGroupName resource group..."
+write-host "Creating $synapseWorkspaceName Synapse Analytics workspace in $resourceGroupName resource group..."
 write-host "(This may take some time!)"
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
-  -TemplateFile "setup.json" `
+  -TemplateFile "setup-CF.json" `
   -Mode Complete `
   -workspaceName $synapseWorkspaceName `
   -dataLakeAccountName $dataLakeAccountName `
