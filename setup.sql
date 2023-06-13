@@ -5,7 +5,7 @@ GO
 
 CREATE TABLE  [dbo].[DimAffiliateNetwork](
 	[AffiliateNetworkId] [int] NOT NULL,
-	[AffiliateNetworkId] [nvarchar](100) NULL
+	[AffiliateNetworkName] [nvarchar](100) NULL
 )
 
 GO
@@ -40,7 +40,7 @@ GO
 CREATE TABLE [dbo].[DimPromotions](
 	[PromotionId] [int] NOT NULL,
 	[DomainNameId] [int] NULL,
-	[ExpireDate]
+	[ExpireDate] [datetime] NULL
 ),
 CONSTRAINT FKPromotionsDomainNameId 
 	FOREIGN KEY (DomainNameId)
@@ -51,8 +51,8 @@ GO
 CREATE TABLE [dbo].[orders](
 	OrderId [int] NOT NULL,
 	ClickId [int] NULL,
-	CreatedOn [datetime],
-	TransactionDate [datetime],
+	CreatedOn [datetime] NULL,
+	TransactionDate [datetime] NULL,
 	SaleAmount [money] NOT NULL,
 	CommissonAmount [money] NOT NULL,
 	Currency [nvarchar](10) NOT NULL,
