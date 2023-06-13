@@ -51,11 +51,11 @@ GO
 CREATE TABLE [dbo].[orders](
 	OrderId [int] NOT NULL,
 	ClickId [int] NULL,
-	CreatedOn,
-	TransactionDate,
-	SaleAmount,
-	CommissonAmount,
-	Currency,
+	CreatedOn [datetime],
+	TransactionDate [datetime],
+	SaleAmount [money] NOT NULL,
+	CommissonAmount [money] NOT NULL,
+	Currency [nvarchar](10) NOT NULL,
 	AffiliateNetworkId [int] NULL,
 	AdvertiserId [int] NULL
 )
