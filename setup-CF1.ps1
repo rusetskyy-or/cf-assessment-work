@@ -78,7 +78,7 @@ foreach ($provider in $provider_list){
 # Generate unique random suffix
 [string]$suffix =  -join ((48..57) + (97..122) | Get-Random -Count 7 | % {[char]$_})
 Write-Host "Your randomly-generated suffix for Azure resources is $suffix"
-$resourceGroupName = "cf-assessment-$suffix"
+$resourceGroupName = "dp203-$suffix"
 
 # Choose a random region
 Write-Host "Finding an available region. This may take several minutes...";
@@ -168,91 +168,34 @@ New-AzRoleAssignment -SignInName $userName -RoleDefinitionName "Storage Blob Dat
 write-host "Creating the $sqlDatabaseName database..."
 sqlcmd -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -I -i setup.sql
 
-# Create KeyVault
-$KeyVaultName ="kvdwfc$suffix"
-write-host "Creating the $KeyVaultName Azure Key Vault..."
-az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --location $Region
-
-#replace suffix in Synapse pipeline files
-#Get-ChildItem "./pipelines/*." -File | Foreach-Object {
-#    write-host ""
-#    $file = $_.Name
-#    Write-Host $file
-#    $blobPath = "pipelines/$file"
-#    $content = Get-Content -Path $blobPath
-#    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
-#    $NewContent | Set-Content -Path $blobPath  
-#}
-
-#create DataSets in the Azure Synapse Pipelines
-
-$synapseWorkspaceObj = Get-AzSynapseWorkspace -Name $synapseWorkspace -ResourceGroupName $resourceGroupName
-Get-ChildItem "./pipelines/dataset/*.json" -File | Foreach-Object {
-    $file = $_.Name
-    write-host "Creating the $file Azure Synapse Pipelines dataset..."
-    $blobPath = "pipelines/dataset/$file"
-    $content = Get-Content -Path $blobPath
-    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
-    write-host $NewContent
-    $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapseDataset -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspace 
+# Load data
+write-host "Loading data..."
+Get-ChildItem "./data/*.txt" -File | Foreach-Object {
+    write-host ""
+    $file = $_.FullName
+    Write-Host "$file"
+    $table = $_.Name.Replace(".txt","")
+    bcp dbo.$table in $file -S "$synapseWorkspace.sql.azuresynapse.net" -U $sqlUser -P $sqlPassword -d $sqlDatabaseName -f $file.Replace("txt", "fmt") -q -k -E -b 5000
 }
 
-#create Pipelines in the Azure Synapse Pipelines
+# Pause SQL Pool
+write-host "Pausing the $sqlDatabaseName SQL Pool..."
+Suspend-AzSynapseSqlPool -WorkspaceName $synapseWorkspace -Name $sqlDatabaseName -AsJob
 
-Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
+# Upload files
+write-host "Loading data..."
+$storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $dataLakeAccountName
+$storageContext = $storageAccount.Context
+Get-ChildItem "./files/*.csv" -File | Foreach-Object {
+    write-host ""
     $file = $_.Name
-    write-host "Creating the $file Azure Synapse Pipelines pipeline..."
-    $blobPath = "pipelines/pipeline/$file"
-    $content = Get-Content -Path $blobPath
-    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
-    write-host $NewContent
-    $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspace 
+    Write-Host $file
+    $blobPath = "sales_data/$file"
+    Set-AzStorageBlobContent -File $_.FullName -Container "files" -Blob $blobPath -Context $storageContext
 }
 
-#create Pipelines in the Azure Synapse Pipelines
-
-Get-ChildItem "./pipelines/trigger/*.json" -File | Foreach-Object {
-    $file = $_.Name
-    write-host "Creating the $file Azure Synapse Pipelines trigger..."
-    $blobPath = "pipelines/trigger/$file"
-    $content = Get-Content -Path $blobPath
-    $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
-    $NewContent = $content | ForEach-Object {$_ -replace "&subscription&", $subscriptionId}
-    write-host $NewContent
-    $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspace 
-}
-
-
-
-$sourceSasToken = "https://couponfollowdehiring.blob.core.windows.net/hiring/Data.zip?sv=2021-10-04&st=2023-05-26T16%3A27%3A33Z&se=2024-05-27T16%3A27%3A00Z&sr=b&sp=r&sig=0rPNqOglARvrvLEr6CmY3V6LcYGi9yxSmoW73UloYis%3D"
-$sourceSasTokenName = "sourceSasToken"
-$sourceFileName = "Data.zip"
-az keyvault secret set --name $sourceSasTokenName --value $sourceSasToken --vault-name $KeyVaultName
-write-host "SAS Token $sourceSasTokenName is stored into the $KeyVaultName"
-
-$CurrentDate = Get-Date
-$ExpiryDate = $CurrentDate.AddDays(7).ToString("yyyy-MM-dd")
-$SasToken = az storage container generate-sas --account-name $dataLakeAccountName --name $containerName `
---https-only --permissions racw --expiry $ExpiryDate --account-key $storageAccountKey
-$SasToken = $SasToken.Trim('"')
-#$SasTokenName = "stoken$suffix"
-$SasTokenName = "stoken"
-$sqlPasswordName = "sqlPassword"
-az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
-write-host "SAS Token $sqlPasswordName is stored into the $KeyVaultName"
-az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
-write-host "SAS Token $SasTokenName, stored into the $KeyVaultName, will expire at $ExpiryDate"
-
-$targetSasToken = "https://$dataLakeAccountName.blob.core.windows.net/$ContainerName/$sourceFileName"+"?"+$SasToken
-
-write-host $targetSasToken
-
-write-host "Copying the source file $sourceFileName"
-azcopy copy "$sourceSasToken" "$targetSasToken" --recursive=true
-
-
+# Create KQL script
+# Removing until fix for Bad Request error is resolved
+# New-AzSynapseKqlScript -WorkspaceName $synapseWorkspace -DefinitionFile "./files/ingest-data.kql"
 
 write-host "Script completed at $(Get-Date)"
