@@ -42,7 +42,6 @@ if($subs.GetType().IsArray -and $subs.length -gt 1){
 $sqlUser = "SQLUser"
 write-host ""
 $sqlPassword = ""
-$sqlPasswordName = "sqlPassword"
 $complexPassword = 0
 
 while ($complexPassword -ne 1)
@@ -131,7 +130,7 @@ Write-Host "Creating $resourceGroupName resource group in $Region ..."
 New-AzResourceGroup -Name $resourceGroupName -Location $Region | Out-Null
 
 # Create Synapse workspace
-$synapseWorkspaceName = "synapse$suffix"
+$synapseWorkspace = "synapse$suffix"
 $dataLakeAccountName = "datalake$suffix"
 $sparkPool = "spark$suffix"
 $sqlDatabaseName = "sql$suffix"
@@ -142,7 +141,7 @@ write-host "(This may take some time!)"
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
   -TemplateFile "setup.json" `
   -Mode Complete `
-  -workspaceName $synapseWorkspaceName `
+  -workspaceName $synapseWorkspace `
   -dataLakeAccountName $dataLakeAccountName `
   -sparkPoolName $sparkPool `
   -sqlDatabaseName $sqlDatabaseName `
@@ -151,12 +150,16 @@ New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
   -uniqueSuffix $suffix `
   -Force
 
+# Pause Data Explorer pool
+#write-host "Pausing the $adxpool Data Explorer Pool..."
+#Stop-AzSynapseKustoPool -Name $adxpool -ResourceGroupName $resourceGroupName -WorkspaceName $synapseWorkspace -NoWait
+
 # Make the current user and the Synapse service principal owners of the data lake blob store
 write-host "Granting permissions on the $dataLakeAccountName storage account..."
 write-host "(you can ignore any warnings!)"
 $subscriptionId = (Get-AzContext).Subscription.Id
 $userName = ((az ad signed-in-user show) | ConvertFrom-JSON).UserPrincipalName
-$id = (Get-AzADServicePrincipal -DisplayName $synapseWorkspaceName).id
+$id = (Get-AzADServicePrincipal -DisplayName $synapseWorkspace).id
 New-AzRoleAssignment -Objectid $id -RoleDefinitionName "Storage Blob Data Owner" -Scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$dataLakeAccountName" -ErrorAction SilentlyContinue;
 New-AzRoleAssignment -SignInName $userName -RoleDefinitionName "Storage Blob Data Owner" -Scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$dataLakeAccountName" -ErrorAction SilentlyContinue;
 
@@ -183,7 +186,7 @@ az KeyVault Create --name $KeyVaultName --resource-group $resourceGroupName --lo
 
 #create DataSets in the Azure Synapse Pipelines
 
-$synapseWorkspace = Get-AzSynapseWorkspace -Name $synapseWorkspaceName -ResourceGroupName $resourceGroupName
+$synapseWorkspaceObj = Get-AzSynapseWorkspace -Name $synapseWorkspace -ResourceGroupName $resourceGroupName
 Get-ChildItem "./pipelines/dataset/*.json" -File | Foreach-Object {
     $file = $_.Name
     write-host "Creating the $file Azure Synapse Pipelines dataset..."
@@ -192,7 +195,7 @@ Get-ChildItem "./pipelines/dataset/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapseDataset -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapseDataset -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspace 
 }
 
 #create Pipelines in the Azure Synapse Pipelines
@@ -205,7 +208,7 @@ Get-ChildItem "./pipelines/pipeline/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "suffix", $suffix}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspace 
 }
 
 #create Pipelines in the Azure Synapse Pipelines
@@ -219,7 +222,7 @@ Get-ChildItem "./pipelines/trigger/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "&subscription&", $subscriptionId}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspace 
 }
 
 
@@ -237,6 +240,7 @@ $SasToken = az storage container generate-sas --account-name $dataLakeAccountNam
 $SasToken = $SasToken.Trim('"')
 #$SasTokenName = "stoken$suffix"
 $SasTokenName = "stoken"
+$sqlPasswordName = "sqlPassword"
 az keyvault secret set --name $sqlPasswordName --value $sqlPassword --vault-name $KeyVaultName
 write-host "SAS Token $sqlPasswordName is stored into the $KeyVaultName"
 az keyvault secret set --name $SasTokenName --value $SasToken --vault-name $KeyVaultName
