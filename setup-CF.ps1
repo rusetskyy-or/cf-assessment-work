@@ -58,14 +58,14 @@ while ($complexPassword -ne 1)
     ` - At least one special character (!,@,#,%,^,&,$)
     ` "
 
-    if(($SqlPassword -cmatch '[a-z]') -and ($SqlPassword -cmatch '[A-Z]') -and ($SqlPassword -match '\d') -and ($SqlPassword.length -ge 8) -and ($SqlPassword -match '!|@|#|%|^|&|$'))
+    if(($SqlPassword -cmatch '[a-z]') -and ($SqlPassword -cmatch '[A-Z]') -and ($SqlPassword -match '\d') -and ($SqlPassword.length -ge 8) -and ($SqlPassword -match '!|@|#|%|\^|&|\$'))
     {
         $complexPassword = 1
 	    Write-Output "Password $SqlPassword accepted. Make sure you remember this!"
     }
     else
     {
-        Write-Output "$SqlPassword does not meet the compexity requirements."
+        Write-Output "$SqlPassword does not meet the complexity requirements."
     }
 }
 
@@ -139,11 +139,14 @@ $sparkPool = "spark$suffix"
 $sqlDatabaseName = "sql$suffix"
 
 write-host "Creating $synapseWorkspace Synapse Analytics workspace in $resourceGroupName resource group..."
+write-host "(This may take some time!)"
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
   -TemplateFile "setup.json" `
   -Mode Complete `
   -workspaceName $synapseWorkspaceName `
   -dataLakeAccountName $dataLakeAccountName `
+  -sparkPoolName $sparkPool `
+  -sqlDatabaseName $sqlDatabaseName `
   -sqlUser $sqlUser `
   -sqlPassword $sqlPassword `
   -uniqueSuffix $suffix `
