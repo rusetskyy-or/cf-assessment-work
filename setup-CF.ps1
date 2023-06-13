@@ -234,7 +234,7 @@ Get-ChildItem "./pipelines/trigger/*.json" -File | Foreach-Object {
     $NewContent = $content | ForEach-Object {$_ -replace "&subscription&", $subscriptionId}
     write-host $NewContent
     $NewContent | Set-Content -Path $blobPath 
-    New-AzSynapsePipeline -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
+    New-AzSynapseTrigger -File $blobPath -Name $file.Replace(".json","") -WorkspaceName $synapseWorkspaceName 
 }
 
 
